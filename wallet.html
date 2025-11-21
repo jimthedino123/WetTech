@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>WetTech Wallet</title>
 <style>
 body {
-    background:#ededed;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     margin:0;
-    padding:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%);
 }
 
 /* HEADER */
@@ -16,6 +15,8 @@ body {
     padding:20px;
     font-size:28px;
     font-weight:600;
+    text-align:center;
+    color:#333;
 }
 
 /* CARD LIST */
@@ -29,44 +30,48 @@ body {
     border-radius:16px;
     margin-bottom:20px;
     padding:20px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.15);
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
     cursor:pointer;
-    transition: transform .2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.3);
 }
 
-/* slight overlapping tilt */
-.card-stack {
-    transform: rotate(-2deg);
-}
-.card-stack-top {
-    transform: rotate(1.2deg);
-}
+/* CARD STACK EFFECT */
+.card-stack { transform: rotate(-1.5deg); }
+.card-stack-top { transform: rotate(1deg); }
 
-/* Mæsstercard visual */
+/* Mæsstercard design */
 .maes-card {
     background:linear-gradient(135deg, #0066cc, #003366);
     color:white;
 }
-
 .maes-logo {
     font-size:22px;
     font-weight:700;
     margin-bottom:10px;
 }
-
 .card-number {
     font-size:24px;
     letter-spacing:3px;
     margin-top:20px;
     margin-bottom:10px;
 }
-
 .exp {
     font-size:16px;
     opacity:0.85;
 }
 
-/* FULLSCREEN OVERLAY */
+/* PASSPORT THUMBNAIL */
+.passport-thumb {
+    width:100%;
+    border-radius:12px;
+}
+
+/* FULLSCREEN MODALS */
 .fullscreen {
     position:fixed;
     top:0;
@@ -80,40 +85,60 @@ body {
     flex-direction:column;
     z-index:99;
     padding:30px;
+    overflow-y:auto;
 }
-
-.fullscreen h1 {
-    font-size:40px;
-    text-align:center;
-}
-
-.close-btn {
+.fullscreen.active { display:flex; animation: fadeIn 0.3s ease forwards; }
+@keyframes fadeIn { from {opacity:0} to {opacity:1} }
+.fullscreen h1 { font-size:36px; margin-bottom:20px; text-align:center; }
+.close-btn, .back-btn {
     position:absolute;
     top:20px;
-    right:20px;
     font-size:30px;
     cursor:pointer;
+    background:rgba(0,0,0,0.1);
+    border-radius:50%;
+    width:40px;
+    height:40px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#333;
+    transition: background 0.2s;
 }
+.close-btn:hover, .back-btn:hover { background:rgba(0,0,0,0.2); }
+.close-btn { right:20px; }
+.back-btn { left:20px; }
+
+/* CARD EXPAND ANIMATION (NFC ripple effect) */
+.ripple {
+    position:absolute;
+    border-radius:50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background:rgba(0,150,255,0.3);
+    pointer-events:none;
+}
+@keyframes ripple { to { transform: scale(4); opacity:0; } }
 
 /* LOYALTY BARCODE */
 #barcode {
     margin-top:30px;
 }
 
-/* PASSPORT CARD */
-.passport-preview {
+/* LOYALTY CARD DESIGN */
+.loyalty-card {
     width:100%;
-    border-radius:12px;
+    padding:20px;
+    border-radius:16px;
+    background:linear-gradient(135deg, #ffbb33, #ff8800);
+    color:white;
+    text-align:center;
+    box-shadow:0 6px 15px rgba(0,0,0,0.2);
 }
-
-/* PASSPORT IMAGE (cover only) */
-.passport-thumb {
-    width:100%;
-    border-radius:12px;
-}
+.loyalty-card h2 { margin:0; font-size:24px; }
+.loyalty-card p { margin:5px 0 0; font-size:16px; }
 </style>
 </head>
-
 <body>
 
 <div class="header">WetTech Wallet</div>
@@ -121,7 +146,7 @@ body {
 <div class="wallet-section">
 
     <!-- MÆSSTERCARD -->
-    <div class="card maes-card" onclick="openMaes()">
+    <div class="card maes-card" onclick="openMaes(event)">
         <div class="maes-logo">Mæsstercard</div>
         <div class="card-number">12XXXXX890</div>
         <div class="exp">EXP 08/29</div>
@@ -130,13 +155,15 @@ body {
     <h2>Passes & IDs</h2>
 
     <!-- LOYALTY CARD -->
-    <div class="card card-stack" onclick="openLoyalty()">
-        <strong>FlopGroceries Loyalty</strong><br>
-        Tap to show barcode
+    <div class="card card-stack" onclick="openLoyalty(event)">
+        <div class="loyalty-card">
+            <h2>FlopGroceries Loyalty</h2>
+            <p>Tap to show barcode</p>
+        </div>
     </div>
 
     <!-- PASSPORT PREVIEW -->
-    <div class="card card-stack-top" onclick="openPassport()">
+    <div class="card card-stack-top" onclick="openPassport(event)">
         <strong>Cvmberty Island Passport</strong><br><br>
         <img src="coa.png" class="passport-thumb">
     </div>
@@ -145,26 +172,42 @@ body {
 
 <!-- FULLSCREEN MÆSSTERCARD -->
 <div id="maesFull" class="fullscreen">
-    <div class="close-btn" onclick="closeFull()">✕</div>
+    <div class="back-btn" onclick="closeFull()">←</div>
     <h1>Scan at terminal</h1>
 </div>
 
 <!-- FULLSCREEN LOYALTY WITH BARCODE -->
 <div id="loyaltyFull" class="fullscreen">
-    <div class="close-btn" onclick="closeFull()">✕</div>
+    <div class="back-btn" onclick="closeFull()">←</div>
     <h1>FlopGroceries Loyalty</h1>
-    <svg id="barcode"></svg>
+    <div class="loyalty-card" style="margin-top:20px;">
+        <h2>FlopGroceries</h2>
+        <svg id="barcode"></svg>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
-
 <script>
-function openMaes() {
-    document.getElementById("maesFull").style.display = "flex";
+/* ripple effect on tap */
+function createRipple(event, element) {
+    const circle = document.createElement("span");
+    circle.classList.add("ripple");
+    circle.style.left = event.offsetX + "px";
+    circle.style.top = event.offsetY + "px";
+    element.appendChild(circle);
+    setTimeout(() => circle.remove(), 600);
 }
 
-function openLoyalty() {
-    document.getElementById("loyaltyFull").style.display = "flex";
+/* Mæsstercard fullscreen */
+function openMaes(e){
+    createRipple(e, e.currentTarget);
+    document.getElementById("maesFull").classList.add("active");
+}
+
+/* Loyalty fullscreen with barcode */
+function openLoyalty(e){
+    createRipple(e, e.currentTarget);
+    document.getElementById("loyaltyFull").classList.add("active");
 
     JsBarcode("#barcode", "FG-9345021", {
         format: "CODE128",
@@ -175,15 +218,16 @@ function openLoyalty() {
     });
 }
 
-function openPassport() {
+/* Passport open */
+function openPassport(e){
+    createRipple(e, e.currentTarget);
     window.open("pass.pdf", "_blank");
 }
 
-function closeFull() {
-    document.getElementById("maesFull").style.display = "none";
-    document.getElementById("loyaltyFull").style.display = "none";
+/* Close fullscreen */
+function closeFull(){
+    document.querySelectorAll(".fullscreen").forEach(f => f.classList.remove("active"));
 }
 </script>
-
 </body>
 </html>
