@@ -67,10 +67,10 @@
 
 <label>Age Rating</label>
 <select id="rating">
-    <option value="FR-K">FR-K - suitable for all</option>
-    <option value="FR-PG">FR-PG - suitable for 7+ with parental supervision</option>
-    <option value="FR-T">FR-T - suitable for teens</option>
-    <option value="FR-R">FR-R - suitable only for adults</option>
+    <option value="1.png">FR-K (1.png)</option>
+    <option value="2.png">FR-PG (2.png)</option>
+    <option value="3.png">FR-T (3.png)</option>
+    <option value="4.png">FR-R (4.png)</option>
 </select>
 
 <button onclick="makePDF()">Done</button>
@@ -78,7 +78,6 @@
 <script>
 async function makePDF() {
     const { jsPDF } = window.jspdf;
-
     const doc = new jsPDF({
         orientation: "portrait",
         unit: "pt",
@@ -86,36 +85,41 @@ async function makePDF() {
     });
 
     const title = document.getElementById("title").value;
-    const rating = document.getElementById("rating").value;
+    const ratingImgFile = document.getElementById("rating").value;
 
-    // Load images
-    const floprateImg = await toDataURL("https://floprate.netlify.app/logo.png");
-    const fwbImg = await toDataURL("https://floprate.netlify.app/fwb.png");
+    // External images
+    const floprateLogo = await toDataURL("https://floprate.netlify.app/logo.png");
+    const fwbLogo = await toDataURL("https://floprate.netlify.app/fwb.png");
 
-    // Add FlopRate logo
-    doc.addImage(floprateImg, "PNG", 200, 40, 180, 180);
+    // Rating image (replace URLs with your folder later)
+    const ratingImg = await toDataURL("https://floprate.netlify.app/" + ratingImgFile);
 
+    // ---------- TOP LOGO ----------
+    doc.addImage(floprateLogo, "PNG", 160, 40, 250, 0); // height auto (keeps ratio)
+
+    // ---------- TEXT ----------
     doc.setFont("Helvetica", "normal");
-    doc.setFontSize(20);
+    doc.setFontSize(22);
 
-    // Show title with large blank area below
-    doc.text("Your show:", 50, 270);
+    doc.text("Your show:", 50, 260);
+
     doc.setFontSize(28);
-    doc.text(title || "_____________________________", 50, 310);
+    doc.text(title || "__________________________", 50, 300);
 
-    doc.setFontSize(20);
-    doc.text("has been awarded this age rating by our team:", 50, 360);
+    doc.setFontSize(22);
+    doc.text("has been awarded this age rating by our team:", 50, 350);
 
-    // Another large blank area
-    doc.setFontSize(28);
-    doc.text(rating || "__________________________", 50, 410);
+    // ---------- RATING IMAGE ----------
+    doc.addImage(ratingImg, "PNG", 50, 380, 200, 0); // auto height
 
-    // Add FlopWatch Broadcasting logo at bottom
-    doc.addImage(fwbImg, "PNG", 200, 500, 180, 180);
+    // ---------- BOTTOM LOGO ----------
+    doc.addImage(fwbLogo, "PNG", 160, 520, 250, 0); // auto height
 
+    // Save PDF
     doc.save("FlopRate-Certificate.pdf");
 }
 
+// Convert external URL → dataURL to bypass jsPDF restrictions
 function toDataURL(url) {
     return new Promise((resolve) => {
         const img = new Image();
