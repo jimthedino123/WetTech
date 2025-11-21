@@ -1,457 +1,239 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Floptropican Passport PDF Generator</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<title>Floptropican Passport Maker</title>
 
 <style>
-  :root{
-    --passport-width: 850px;
-  }
+body {
+    font-family: Arial, sans-serif;
+    background:#e9f7e2;
+    margin:0;
+    padding:20px;
+}
 
-  body{
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    margin: 20px;
-    background: #f3f4f6;
-    color: #111827;
-  }
-
-  h1 { margin-bottom: 6px; font-size: 20px; }
-  p.lead { margin-top:0; color:#374151; }
-
-  .layout{
-    display:flex;
-    gap:18px;
-    align-items:flex-start;
-    flex-wrap:wrap;
-  }
-
-  .controls{
-    min-width:280px;
-    max-width:360px;
-    background:#fff;
-    padding:14px;
+.container {
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:20px;
     border-radius:10px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.06);
-  }
+}
 
-  label{ display:block; margin-top:10px; font-weight:600; font-size:13px; }
-  input[type="text"], input[type="date"], input[type="file"] {
-    width:100%;
-    margin-top:6px;
+input, button {
     padding:8px;
-    border-radius:6px;
-    border:1px solid #d1d5db;
-    box-sizing:border-box;
-  }
-
-  .btn{
-    margin-top:12px;
-    padding:10px 14px;
-    background:#0b74ff;
-    color:white;
-    border-radius:8px;
-    font-weight:700;
-    border:0;
-    cursor:pointer;
-  }
-  .btn.secondary{ background:#6b7280; }
-
-  .preview-wrap{
-    width:var(--passport-width);
-    max-width:100%;
-  }
-
-  .passport-preview{
+    margin-top:10px;
     width:100%;
-    box-shadow:0 12px 30px rgba(2,6,23,0.12);
-    border-radius:6px;
+}
+
+.page-preview {
+    border:1px solid #ccc;
+    margin-top:20px;
+    padding:20px;
+    background:white;
+}
+
+.passport-page {
+    width: 600px;
+    height: 800px;
+    position: relative;
+    background: #d9f0d2;
+    margin-bottom: 30px;
     overflow:hidden;
-    background: #fff;
-  }
+}
 
-  .page{
-    width:100%;
-    height:1200px;
-    position:relative;
-    page-break-after:always;
-  }
+/* FRONT COVER */
+.cover-bg {
+    background:#cfe7c8;
+}
 
-  .front{
-    background: #9fbf86;
-    background: linear-gradient(180deg, rgba(157,187,140,0.15), rgba(157,187,140,0.25));
-    display:flex;
-    justify-content:center;
-    align-items:center;
-  }
+.cover-coa {
+    position:absolute;
+    top:27%;
+    left:50%;
+    transform:translateX(-50%);
+    width:40%;
+    opacity:0.9;
+}
 
-  .top-left-flags{
+.cover-flags img {
+    width:65px;
+    margin-right:10px;
+}
+
+.cover-flags {
     position:absolute;
     top:20px;
     left:20px;
     display:flex;
-    gap:6px;
-  }
-  .top-left-flags img{
-    width:58px;
-    height:38px;
-    object-fit:cover;
-    border-radius:4px;
-    border:1px solid rgba(0,0,0,0.08);
-  }
+}
 
-  .coa-wrap{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    height:calc(100% - 220px);
-    width:100%;
-  }
-  .coa-wrap img{
-    width:330px;
-    height:330px;
-    object-fit:contain;
-  }
-
-  /* NEW — scan symbol at bottom */
-  .scan-symbol{
+.cover-title {
     position:absolute;
-    bottom:95px;
+    bottom:110px;
     left:50%;
     transform:translateX(-50%);
-  }
-  .scan-symbol img{
-    width:80px;
-    height:auto;
-    object-fit:contain;
-    opacity:0.95;
-  }
-
-  .front-footer{
-    position:absolute;
-    bottom:20px;
-    width:100%;
     text-align:center;
-  }
-  .front-footer .title{
-    font-size:20px;
-    font-weight:800;
-  }
-  .front-footer .mandarin{
-    font-size:14px;
-    margin-top:4px;
-    font-weight:600;
-  }
+    font-size:22px;
+    font-weight:bold;
+}
 
-  /* INNER PAGE */
-  .inner{
-    background:linear-gradient(180deg,#fff,#f8fafc);
-    padding:28px 36px;
-    display:flex;
-    gap:20px;
-  }
+.scan-symbol {
+    position:absolute;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    width:60px;
+}
 
-  .bio{
-    width:40%;
-    border:1px dashed rgba(0,0,0,0.1);
-    padding:14px;
-    border-radius:8px;
-  }
+/* IDENTITY PAGE */
+.id-page {
+    background:#ffffff;
+    padding:40px;
+}
 
-  .photo-box{
-    width:100%;
-    height:320px;
-    border-radius:6px;
-    overflow:hidden;
-    background:#e5ecec;
-  }
+.id-photo {
+    width:150px;
+    height:200px;
+    border:1px solid #aaa;
+    object-fit:cover;
+}
 
-  .photo{
-    width:100%;
-    height:100%;
-    background-position:center;
-    background-size:cover;
-  }
+.id-info {
+    margin-top:20px;
+    font-size:18px;
+}
 
-  .data{ margin-top:12px; }
-  .data-item{
-    margin-bottom:8px;
-    display:flex;
-    gap:6px;
-  }
-  .data-item .label{
-    font-weight:700;
-    width:110px;
-  }
-  .data-item .value{
-    font-weight:800;
-  }
+/* STAMP PAGE */
+.stamp-page {
+    background:white;
+    padding:40px;
+    font-size:22px;
+    color:#444;
+}
 
-  .stamps{
-    width:60%;
-    background:#f5f7f8;
-    border-radius:8px;
-    padding:12px;
-  }
-
-  .stamp-grid{
-    margin-top:10px;
-    display:grid;
-    gap:12px;
-    grid-template-columns:repeat(3,1fr);
-  }
-  .stamp{
-    border:2px dashed rgba(0,0,0,0.08);
-    min-height:130px;
-    border-radius:8px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    color:#4b5563;
-  }
-
-  .a4-page{
-    width:210mm;
-    min-height:297mm;
-  }
-
-  @media(max-width:900px){
-    .layout{ flex-direction:column; }
-  }
 </style>
 </head>
+
 <body>
 
-<h1>Floptropica Passport — PDF Generator</h1>
-<p class="lead">Now includes the official bottom scan symbol.</p>
+<div class="container">
+    <h2>Floptropican Passport Generator</h2>
 
-<div class="layout">
-  <div class="controls">
+    <label>Your Name</label>
+    <input id="nameInput" placeholder="Enter full name">
 
-    <label>Name</label>
-    <input id="name" type="text" value="Alex Flop">
+    <label>Date of Birth</label>
+    <input id="dobInput" placeholder="DD/MM/YYYY">
 
-    <label>Date of birth</label>
-    <input id="dob" type="date" value="2010-01-01">
+    <label>Passport Number</label>
+    <input id="passNumInput" placeholder="FLO-XXXXXX">
 
-    <label>Upload photo (required)</label>
-    <input id="photoInput" type="file" accept="image/*">
+    <label>Upload Your Photo</label>
+    <input type="file" id="photoInput" accept="image/*">
 
-    <label>Replace coat of arms (optional)</label>
-    <input id="coaInput" type="file" accept="image/*">
+    <label>coa.png</label><input type="file" id="coaInput" accept="image/*">
+    <label>fl1.png</label><input type="file" id="fl1Input" accept="image/*">
+    <label>fl2.png</label><input type="file" id="fl2Input" accept="image/*">
+    <label>d.png</label><input type="file" id="dInput" accept="image/*">
 
-    <label>Replace flag 1 (optional)</label>
-    <input id="fl1Input" type="file" accept="image/*">
-
-    <label>Replace flag 2 (optional)</label>
-    <input id="fl2Input" type="file" accept="image/*">
-
-    <label>Replace scan symbol (optional, default: d.png)</label>
-    <input id="scanInput" type="file" accept="image/*">
-
-    <button class="btn secondary" id="previewBtn">Update Preview</button>
-    <button class="btn" id="generate">Generate PDF</button>
-
-  </div>
-
-  <div class="preview-wrap">
-    <div id="preview" class="passport-preview">
-
-      <!-- FRONT PAGE -->
-      <div class="page front a4-page" id="page-front">
-
-        <div class="top-left-flags">
-          <img id="flag1" src="fl1.png" onerror="this.style.display='none'">
-          <img id="flag2" src="fl2.png" onerror="this.style.display='none'">
-        </div>
-
-        <div class="coa-wrap">
-          <img id="coaImg" src="coa.png" onerror="this.style.display='none'">
-        </div>
-
-        <!-- NEW: Scan symbol -->
-        <div class="scan-symbol">
-          <img id="scanImg" src="d.png" onerror="this.style.display='none'">
-        </div>
-
-        <div class="front-footer">
-          <div class="title">Republic of Floptropica Passport</div>
-          <div class="mandarin">弗洛普特里卡共和国护照</div>
-        </div>
-      </div>
-
-      <!-- INNER PAGE -->
-      <div class="page inner a4-page" id="page-inner">
-
-        <div class="bio">
-          <div class="photo-box">
-            <div id="photoPreview" class="photo"></div>
-          </div>
-
-          <div class="data">
-            <div class="data-item">
-              <div class="label">Name</div>
-              <div id="pv-name" class="value">Alex Flop</div>
-            </div>
-
-            <div class="data-item">
-              <div class="label">DOB</div>
-              <div id="pv-dob" class="value">2010-01-01</div>
-            </div>
-
-            <div class="data-item">
-              <div class="label">Nationality</div>
-              <div class="value">Floptropican</div>
-            </div>
-
-            <div class="data-item">
-              <div class="label">Passport No.</div>
-              <div id="pv-passno" class="value">FLP-0000001</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="stamps">
-          <strong>Stamps & Visas</strong>
-          <div class="stamp-grid">
-            <div class="stamp">STAMP</div>
-            <div class="stamp">STAMP</div>
-            <div class="stamp">STAMP</div>
-            <div class="stamp">STAMP</div>
-            <div class="stamp">STAMP</div>
-            <div class="stamp">STAMP</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
+    <button onclick="generatePDF()">Generate Passport PDF</button>
 </div>
 
+<!-- Hidden previews for PDF rendering -->
+
+<div id="page1" class="passport-page cover-bg" style="display:none;">
+    <div class="cover-flags">
+        <img id="fl1Img">
+        <img id="fl2Img">
+    </div>
+    <img id="coaImg" class="cover-coa">
+    <div class="cover-title">
+        Republic of Floptropica Passport <br>
+        弗洛普热西亚共和国护照
+    </div>
+    <img id="scanImg" class="scan-symbol">
+</div>
+
+<div id="page2" class="passport-page" style="display:none; background:white; padding:40px;">
+    <h2>Identity Information</h2>
+    <img id="photoPreview" class="id-photo">
+    <div class="id-info" id="idText"></div>
+</div>
+
+<div id="page3" class="passport-page stamp-page" style="display:none;">
+    <h2>Visa & Entry Stamps</h2>
+    <p>Space for stamps...</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-(function(){
+function fileToDataURL(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e){ callback(e.target.result); };
+    reader.readAsDataURL(file);
+}
 
-  const nameEl = document.getElementById('name');
-  const dobEl = document.getElementById('dob');
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    let pdf = new jsPDF({ unit:"px", format:[600,800] });
 
-  const pvName = document.getElementById('pv-name');
-  const pvDob = document.getElementById('pv-dob');
-  const pvPassNo = document.getElementById('pv-passno');
+    // Load images
+    const files = {
+        coa: document.getElementById("coaInput").files[0],
+        fl1: document.getElementById("fl1Input").files[0],
+        fl2: document.getElementById("fl2Input").files[0],
+        dimg: document.getElementById("dInput").files[0],
+        photo: document.getElementById("photoInput").files[0]
+    };
 
-  const photoInput = document.getElementById('photoInput');
-  const photoPreview = document.getElementById('photoPreview');
-
-  const coaInput = document.getElementById('coaInput');
-  const fl1Input = document.getElementById('fl1Input');
-  const fl2Input = document.getElementById('fl2Input');
-  const scanInput = document.getElementById('scanInput');
-
-  const coaImg = document.getElementById('coaImg');
-  const flag1 = document.getElementById('flag1');
-  const flag2 = document.getElementById('flag2');
-  const scanImg = document.getElementById('scanImg');
-
-  function readFile(file){
-    return new Promise(res=>{
-      if(!file) return res(null);
-      const r = new FileReader();
-      r.onload=()=>res(r.result);
-      r.readAsDataURL(file);
-    });
-  }
-
-  function updatePreview(){
-    pvName.textContent = nameEl.value;
-    pvDob.textContent = dobEl.value;
-    pvPassNo.textContent = "FLP-" + (Math.random()*1e7|0);
-  }
-
-  photoInput.addEventListener('change', async e=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    const url = await readFile(f);
-    photoPreview.style.backgroundImage = `url('${url}')`;
-  });
-
-  coaInput.addEventListener('change', async e=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    coaImg.src = await readFile(f);
-  });
-
-  fl1Input.addEventListener('change', async e=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    flag1.src = await readFile(f);
-  });
-
-  fl2Input.addEventListener('change', async e=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    flag2.src = await readFile(f);
-  });
-
-  scanInput.addEventListener('change', async e=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    scanImg.src = await readFile(f);
-  });
-
-  document.getElementById('previewBtn').addEventListener('click',()=>{
-    updatePreview();
-    alert("Preview updated!");
-  });
-
-  document.getElementById('generate').addEventListener('click', async()=>{
-
-    if(!photoInput.files[0]){
-      alert("Upload a photo first!");
-      return;
+    // Convert image files to Data URLs
+    const urls = {};
+    for (const key in files) {
+        if (files[key]) {
+            urls[key] = await new Promise(res => fileToDataURL(files[key], res));
+        }
     }
 
-    updatePreview();
+    // Insert into preview DOM
+    if (urls.coa) document.getElementById("coaImg").src = urls.coa;
+    if (urls.fl1) document.getElementById("fl1Img").src = urls.fl1;
+    if (urls.fl2) document.getElementById("fl2Img").src = urls.fl2;
+    if (urls.dimg) document.getElementById("scanImg").src = urls.dimg;
+    if (urls.photo) document.getElementById("photoPreview").src = urls.photo;
 
-    const preview = document.getElementById('preview');
-    const cloned = preview.cloneNode(true);
+    // Fill ID text
+    document.getElementById("idText").innerHTML =
+        `<strong>Name:</strong> ${document.getElementById("nameInput").value}<br>
+         <strong>D.O.B:</strong> ${document.getElementById("dobInput").value}<br>
+         <strong>Passport No.:</strong> ${document.getElementById("passNumInput").value}`;
 
-    // copy photo
-    cloned.querySelector('#photoPreview').style.backgroundImage =
-      getComputedStyle(photoPreview).backgroundImage;
+    // Render each page
+    async function addPageFromDiv(divId, isFirst) {
+        let node = document.getElementById(divId);
+        let canvas = await html2canvas(node, { scale:2 });
+        let img = canvas.toDataURL("image/png");
+        if (!isFirst) pdf.addPage();
+        pdf.addImage(img, "PNG", 0, 0, 600, 800);
+    }
 
-    cloned.querySelector('#coaImg').src = coaImg.src;
-    cloned.querySelector('#flag1').src = flag1.src;
-    cloned.querySelector('#flag2').src = flag2.src;
-    cloned.querySelector('#scanImg').src = scanImg.src;
+    // Load html2canvas dynamically
+    if (!window.html2canvas) {
+        await new Promise(res => {
+            let s = document.createElement("script");
+            s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+            s.onload = res;
+            document.body.appendChild(s);
+        });
+    }
 
-    const wrapper = document.createElement('div');
-    wrapper.style.width="210mm";
-    wrapper.appendChild(cloned);
+    await addPageFromDiv("page1", true);
+    await addPageFromDiv("page2", false);
+    await addPageFromDiv("page3", false);
 
-    const off = document.createElement('div');
-    off.style.position="fixed";
-    off.style.left="-9999px";
-    off.appendChild(wrapper);
-    document.body.appendChild(off);
-
-    await html2pdf()
-      .set({
-        margin:[10,10,10,10],
-        filename: nameEl.value+"_floptropica_passport.pdf",
-        html2canvas:{scale:2,scrollY:0},
-        jsPDF:{unit:"mm",format:"a4"}
-      })
-      .from(wrapper)
-      .save();
-
-    document.body.removeChild(off);
-  });
-
-  updatePreview();
-})();
+    pdf.save("Floptropica_Passport.pdf");
+}
 </script>
 
 </body>
