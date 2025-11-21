@@ -26,26 +26,17 @@ input, button {
     width:100%;
 }
 
-.page-preview {
-    border:1px solid #ccc;
-    margin-top:20px;
-    padding:20px;
-    background:white;
-}
-
 .passport-page {
     width: 600px;
     height: 800px;
-    position: relative;
-    background: #d9f0d2;
-    margin-bottom: 30px;
+    position: absolute;
+    left:-9999px;   /* <-- makes it invisible but still renderable */
+    top:0;
     overflow:hidden;
 }
 
 /* FRONT COVER */
-.cover-bg {
-    background:#cfe7c8;
-}
+.cover-bg { background:#cfe7c8; }
 
 .cover-coa {
     position:absolute;
@@ -86,12 +77,7 @@ input, button {
     width:60px;
 }
 
-/* IDENTITY PAGE */
-.id-page {
-    background:#ffffff;
-    padding:40px;
-}
-
+/* ID PAGE */
 .id-photo {
     width:150px;
     height:200px;
@@ -106,12 +92,10 @@ input, button {
 
 /* STAMP PAGE */
 .stamp-page {
-    background:white;
-    padding:40px;
     font-size:22px;
     color:#444;
+    padding:40px;
 }
-
 </style>
 </head>
 
@@ -121,13 +105,13 @@ input, button {
     <h2>Floptropican Passport Generator</h2>
 
     <label>Your Name</label>
-    <input id="nameInput" placeholder="Enter full name">
+    <input id="nameInput">
 
     <label>Date of Birth</label>
-    <input id="dobInput" placeholder="DD/MM/YYYY">
+    <input id="dobInput">
 
     <label>Passport Number</label>
-    <input id="passNumInput" placeholder="FLO-XXXXXX">
+    <input id="passNumInput">
 
     <label>Upload Your Photo</label>
     <input type="file" id="photoInput" accept="image/*">
@@ -140,9 +124,9 @@ input, button {
     <button onclick="generatePDF()">Generate Passport PDF</button>
 </div>
 
-<!-- Hidden previews for PDF rendering -->
+<!-- PAGES (off-screen but visible to html2canvas) -->
 
-<div id="page1" class="passport-page cover-bg" style="display:none;">
+<div id="page1" class="passport-page cover-bg">
     <div class="cover-flags">
         <img id="fl1Img">
         <img id="fl2Img">
@@ -155,82 +139,71 @@ input, button {
     <img id="scanImg" class="scan-symbol">
 </div>
 
-<div id="page2" class="passport-page" style="display:none; background:white; padding:40px;">
+<div id="page2" class="passport-page" style="background:white; padding:40px;">
     <h2>Identity Information</h2>
     <img id="photoPreview" class="id-photo">
     <div class="id-info" id="idText"></div>
 </div>
 
-<div id="page3" class="passport-page stamp-page" style="display:none;">
+<div id="page3" class="passport-page stamp-page">
     <h2>Visa & Entry Stamps</h2>
-    <p>Space for stamps...</p>
+    <p>Space for stamps…</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
-function fileToDataURL(file, callback) {
-    const reader = new FileReader();
-    reader.onload = function(e){ callback(e.target.result); };
-    reader.readAsDataURL(file);
+function readFileAsURL(file) {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
 }
 
 async function generatePDF() {
     const { jsPDF } = window.jspdf;
     let pdf = new jsPDF({ unit:"px", format:[600,800] });
 
-    // Load images
+    // Load files
     const files = {
-        coa: document.getElementById("coaInput").files[0],
-        fl1: document.getElementById("fl1Input").files[0],
-        fl2: document.getElementById("fl2Input").files[0],
-        dimg: document.getElementById("dInput").files[0],
-        photo: document.getElementById("photoInput").files[0]
+        photo: photoInput.files[0],
+        coa: coaInput.files[0],
+        fl1: fl1Input.files[0],
+        fl2: fl2Input.files[0],
+        d:   dInput.files[0]
     };
-
-    // Convert image files to Data URLs
     const urls = {};
+
     for (const key in files) {
-        if (files[key]) {
-            urls[key] = await new Promise(res => fileToDataURL(files[key], res));
-        }
+        if (files[key]) urls[key] = await readFileAsURL(files[key]);
     }
 
-    // Insert into preview DOM
-    if (urls.coa) document.getElementById("coaImg").src = urls.coa;
-    if (urls.fl1) document.getElementById("fl1Img").src = urls.fl1;
-    if (urls.fl2) document.getElementById("fl2Img").src = urls.fl2;
-    if (urls.dimg) document.getElementById("scanImg").src = urls.dimg;
-    if (urls.photo) document.getElementById("photoPreview").src = urls.photo;
+    // Insert images in DOM
+    if (urls.photo) photoPreview.src = urls.photo;
+    if (urls.coa)   coaImg.src = urls.coa;
+    if (urls.fl1)   fl1Img.src = urls.fl1;
+    if (urls.fl2)   fl2Img.src = urls.fl2;
+    if (urls.d)     scanImg.src = urls.d;
 
-    // Fill ID text
-    document.getElementById("idText").innerHTML =
-        `<strong>Name:</strong> ${document.getElementById("nameInput").value}<br>
-         <strong>D.O.B:</strong> ${document.getElementById("dobInput").value}<br>
-         <strong>Passport No.:</strong> ${document.getElementById("passNumInput").value}`;
+    // Set text
+    idText.innerHTML = `
+        <strong>Name:</strong> ${nameInput.value}<br>
+        <strong>D.O.B:</strong> ${dobInput.value}<br>
+        <strong>Passport Number:</strong> ${passNumInput.value}
+    `;
 
-    // Render each page
-    async function addPageFromDiv(divId, isFirst) {
-        let node = document.getElementById(divId);
-        let canvas = await html2canvas(node, { scale:2 });
-        let img = canvas.toDataURL("image/png");
+    async function pageToPDF(divId, isFirst) {
+        const canvas = await html2canvas(document.getElementById(divId), {scale:2});
+        const img = canvas.toDataURL("image/png");
         if (!isFirst) pdf.addPage();
         pdf.addImage(img, "PNG", 0, 0, 600, 800);
     }
 
-    // Load html2canvas dynamically
-    if (!window.html2canvas) {
-        await new Promise(res => {
-            let s = document.createElement("script");
-            s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-            s.onload = res;
-            document.body.appendChild(s);
-        });
-    }
-
-    await addPageFromDiv("page1", true);
-    await addPageFromDiv("page2", false);
-    await addPageFromDiv("page3", false);
+    await pageToPDF("page1", true);
+    await pageToPDF("page2", false);
+    await pageToPDF("page3", false);
 
     pdf.save("Floptropica_Passport.pdf");
 }
