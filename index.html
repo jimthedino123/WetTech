@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FlopRate – Submission Request</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f0f0f;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    header {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    header img {
+        width: 180px;
+        height: auto;
+    }
+
+    h1 {
+        margin: 10px 0 20px;
+        font-size: 32px;
+        letter-spacing: 1px;
+    }
+
+    .form-container {
+        width: 90%;
+        max-width: 600px;
+        background: #181818;
+        padding: 20px 25px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        margin-bottom: 40px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        outline: none;
+        font-size: 15px;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    button {
+        margin-top: 25px;
+        width: 100%;
+        padding: 12px;
+        font-size: 17px;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        background: crimson;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: rgb(190, 0, 40);
+    }
+
+    footer {
+        width: 100%;
+        text-align: center;
+        padding: 30px 10px;
+        background: #111;
+    }
+
+    footer img {
+        width: 90px;
+        margin: 10px;
+    }
+
+    .note {
+        margin-top: 15px;
+        opacity: 0.7;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <img src="logo.png" alt="FlopRate Logo">
+    <h1>Submit Your Show or Movie</h1>
+</header>
+
+<div class="form-container">
+    <label>Title</label>
+    <input type="text" id="title">
+
+    <label>Type</label>
+    <select id="type">
+        <option value="Show">Show</option>
+        <option value="Movie">Movie</option>
+    </select>
+
+    <label>Category</label>
+    <select id="category" onchange="toggleOtherCategory()">
+        <option value="Drama">Drama</option>
+        <option value="Comedy">Comedy</option>
+        <option value="Action">Action</option>
+        <option value="Horror">Horror</option>
+        <option value="Fantasy">Fantasy</option>
+        <option value="Documentary">Documentary</option>
+        <option value="Animation">Animation</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <input type="text" id="otherCategory" placeholder="Enter custom category" style="display:none; margin-top:10px;">
+
+    <label>Short Description</label>
+    <textarea id="desc"></textarea>
+
+    <label>The rating you think it would be</label>
+    <input type="text" id="rating">
+
+    <button onclick="sendEmail()">Send Request</button>
+</div>
+
+<footer>
+    <p>In partnership with</p>
+    <img src="wt.png" alt="WetTech">
+    <img src="fwb.png" alt="FlopWatch Broadcasting">
+    <p class="note">Responses can take between 2 and 3 weeks at most.</p>
+</footer>
+
+<script>
+function toggleOtherCategory() {
+    const cat = document.getElementById("category").value;
+    const otherBox = document.getElementById("otherCategory");
+    otherBox.style.display = cat === "Other" ? "block" : "none";
+}
+
+function sendEmail() {
+    const title = document.getElementById("title").value;
+    const type = document.getElementById("type").value;
+    let category = document.getElementById("category").value;
+    const otherCat = document.getElementById("otherCategory").value;
+    const desc = document.getElementById("desc").value;
+    const rating = document.getElementById("rating").value;
+
+    if (category === "Other" && otherCat.trim() !== "") {
+        category = otherCat;
+    }
+
+    const body =
+`Title: ${title}
+Type: ${type}
+Category: ${category}
+Short Description: ${desc}
+The rating I think it would be: ${rating}`;
+
+    const mailtoLink =
+        `mailto:floprate.by.fwb@gmail.com?subject=FlopRate Submission – ${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+}
+</script>
+
+</body>
+</html>
