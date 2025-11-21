@@ -27,17 +27,18 @@ body {
 /* CARD STYLE */
 .card {
     background:white;
-    border-radius:16px;
+    border-radius:20px;
     margin-bottom:20px;
     padding:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
     cursor:pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
+    min-height:120px;
 }
 .card:hover {
     transform: translateY(-5px);
-    box-shadow:0 12px 30px rgba(0,0,0,0.3);
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
 }
 
 /* CARD STACK EFFECT */
@@ -48,17 +49,21 @@ body {
 .maes-card {
     background:linear-gradient(135deg, #0066cc, #003366);
     color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:20px 25px;
+    min-height:160px;
 }
 .maes-logo {
     font-size:22px;
     font-weight:700;
-    margin-bottom:10px;
 }
 .card-number {
-    font-size:24px;
+    font-size:22px;
     letter-spacing:3px;
-    margin-top:20px;
-    margin-bottom:10px;
+    margin-top:10px;
+    margin-bottom:5px;
 }
 .exp {
     font-size:16px;
@@ -67,8 +72,10 @@ body {
 
 /* PASSPORT THUMBNAIL */
 .passport-thumb {
-    width:100%;
+    width:50%;
     border-radius:12px;
+    display:block;
+    margin:10px auto 0;
 }
 
 /* FULLSCREEN MODALS */
@@ -133,7 +140,7 @@ body {
     background:linear-gradient(135deg, #ffbb33, #ff8800);
     color:white;
     text-align:center;
-    box-shadow:0 6px 15px rgba(0,0,0,0.2);
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
 }
 .loyalty-card h2 { margin:0; font-size:24px; }
 .loyalty-card p { margin:5px 0 0; font-size:16px; }
@@ -164,7 +171,7 @@ body {
 
     <!-- PASSPORT PREVIEW -->
     <div class="card card-stack-top" onclick="openPassport(event)">
-        <strong>Cvmberty Island Passport</strong><br><br>
+        <strong>Cvmberty Island Passport</strong>
         <img src="coa.png" class="passport-thumb">
     </div>
 
