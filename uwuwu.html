@@ -585,12 +585,19 @@ footer {
         </div>
     </div>
 
-    <!-- Placeholder card -->
-    <div class="card" style="opacity:0.25; pointer-events:none;">
-        <div style="width:100%;aspect-ratio:16/10;background:var(--surface3);"></div>
+    <!-- WEATHER CARD -->
+    <div class="card" id="weatherCard" onclick="speakWeather()">
+        <div id="weatherThumb" style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#0d1b2a,#1b3a5c);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;position:relative;overflow:hidden;">
+            <div style="position:absolute;inset:0;opacity:0.18;background:radial-gradient(circle at 60% 40%, #4fc3f7 0%, transparent 65%);"></div>
+            <div id="weatherIcon" style="font-size:36px;line-height:1;">⛅</div>
+            <div id="weatherTemp" style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:white;letter-spacing:1px;">--°</div>
+        </div>
+        <div class="card-overlay">
+            <div class="card-play-icon">🔊</div>
+        </div>
         <div class="card-info">
-            <div class="card-name">Coming Soon</div>
-            <div class="card-sub">Stay tuned</div>
+            <div class="card-name" id="weatherCardName">Loading weather…</div>
+            <div class="card-sub" id="weatherCardSub">Tap to hear forecast</div>
         </div>
     </div>
 
@@ -659,6 +666,104 @@ document.getElementById('playerModal').addEventListener('click', e => {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closePlayer();
 });
+</script>
+
+<!-- SAM.js robot voice -->
+
+<script type="module">
+import SamJs from "https://unpkg.com/sam-js@0.3.1/dist/samjs.esm.min.js";
+window._SAM = SamJs;
+</script>
+
+<!-- Weather + speak -->
+
+<script>
+const WEATHER_KEY = "420fc2a88e214d8a82d142559260504";
+let weatherText = "";
+let weatherLoaded = false;
+
+const conditionEmoji = (code, isDay) => {
+    if (code === 1000) return isDay ? "☀️" : "🌙";
+    if (code <= 1009) return "☁️";
+    if (code <= 1030) return "🌫️";
+    if (code <= 1069) return "🌧️";
+    if (code <= 1117) return "❄️";
+    if (code <= 1135) return "🌫️";
+    if (code <= 1207) return "🌨️";
+    if (code <= 1225) return "❄️";
+    if (code <= 1237) return "🧊";
+    if (code <= 1264) return "🌧️";
+    if (code <= 1282) return "⛈️";
+    return "🌡️";
+};
+
+async function fetchWeather() {
+    try {
+        const res = await fetch(
+            "https://api.weatherapi.com/v1/current.json?key=" + WEATHER_KEY + "&q=auto:ip&aqi=no"
+        );
+        const d = await res.json();
+        const c = d.current;
+        const locName   = d.location.name;
+        const country   = d.location.country;
+        const tempF     = Math.round(c.temp_c);
+        const feelsF    = Math.round(c.feelslike_c);
+        const condition = c.condition.text;
+        const humidity  = c.humidity;
+        const windMph   = Math.round(c.wind_mph);
+
+        document.getElementById("weatherIcon").textContent = conditionEmoji(c.condition.code, c.is_day);
+        document.getElementById("weatherTemp").textContent = tempF + "°C";
+        document.getElementById("weatherCardName").textContent = locName + ", " + country;
+        document.getElementById("weatherCardSub").textContent  = condition + " · Tap to hear";
+
+        const raw = "Current weather for " + locName + " " + country
+            + " " + condition
+            + " Temperature " + tempF + " degrees Celsius"
+            + " Feels like " + feelsF + " degrees"
+            + " Humidity " + humidity + " percent"
+            + " Wind speed " + windMph + " miles per hour";
+
+        weatherText = raw
+            .replace(/[^a-zA-Z\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toUpperCase();
+
+        weatherLoaded = true;
+    } catch (e) {
+        document.getElementById("weatherCardName").textContent = "Weather unavailable";
+        document.getElementById("weatherCardSub").textContent  = "Check connection";
+        console.error("Weather fetch failed", e);
+    }
+}
+
+function speakWeather() {
+    if (!weatherLoaded) {
+        document.getElementById("weatherCardSub").textContent = "Still loading...";
+        return;
+    }
+    const card = document.getElementById("weatherCard");
+    card.style.outline = "2px solid var(--red)";
+    setTimeout(() => card.style.outline = "", 1400);
+
+    const attempt = () => {
+        if (!window._SAM) { setTimeout(attempt, 80); return; }
+        try {
+            const sam = new window._SAM();
+            sam.speed  = 68;
+            sam.pitch  = 60;
+            sam.mouth  = 128;
+            sam.throat = 128;
+            sam.speak(weatherText);
+        } catch (err) {
+            console.error("SAM speak error", err);
+        }
+    };
+    attempt();
+}
+
+window.addEventListener("load", fetchWeather);
 </script>
 
 </body>
