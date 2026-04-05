@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koop.tv</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #141414;
+    color: white;
+}
+
+/* NAVBAR */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    z-index: 10;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #e50914;
+}
+
+/* HERO */
+.hero {
+    height: 70vh;
+    background: url('https://f4.bcbits.com/img/a0223960949_10.jpg') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    padding: 60px;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.hero-content p {
+    max-width: 500px;
+    opacity: 0.8;
+}
+
+.play-btn {
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: white;
+    color: black;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* ROW */
+.row {
+    margin-top: -100px;
+    padding: 20px 40px;
+}
+
+.row h2 {
+    margin-bottom: 15px;
+}
+
+/* CARD CONTAINER */
+.cards {
+    display: flex;
+    gap: 15px;
+}
+
+/* CARD */
+.card {
+    width: 200px;
+    height: 120px;
+    background: #333;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s;
+    position: relative;
+}
+
+.card:hover {
+    transform: scale(1.1);
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-title {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    width: 100%;
+    font-size: 14px;
+    padding: 5px;
+}
+
+/* MODAL PLAYER */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-content {
+    width: 80%;
+    max-width: 900px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 30px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<div class="navbar">
+    <div class="logo">Koop.tv</div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <h1>Yarn Album</h1>
+        <p>A raw and emotional project by McCafferty. Stream now on Koop.tv.</p>
+        <button class="play-btn" onclick="openPlayer('yarn')">Play</button>
+    </div>
+</div>
+
+<!-- ROW -->
+<div class="row">
+    <h2>Now Streaming</h2>
+    <div class="cards">
+
+        <div class="card" onclick="openPlayer('yarn')">
+            <img src="https://f4.bcbits.com/img/a0223960949_10.jpg">
+            <div class="card-title">Yarn Album</div>
+        </div>
+
+        <div class="card" onclick="openPlayer('jack')">
+            <img src="https://f4.bcbits.com/img/0009898048_10.jpg">
+            <div class="card-title">Jack Stauber</div>
+        </div>
+
+        <div class="card" onclick="openPlayer('beachboy')">
+            <img src="https://f4.bcbits.com/img/a2400900313_10.jpg">
+            <div class="card-title">Beachboy Album</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL PLAYER -->
+<div class="modal" id="playerModal">
+    <div class="close-btn" onclick="closePlayer()">✕</div>
+    <div class="modal-content" id="playerContainer"></div>
+</div>
+
+<script>
+function openPlayer(type) {
+    let content = "";
+
+    if (type === "yarn") {
+        content = `
+        <div style='position: relative; padding-bottom: 56.25%; height: 0;'>
+        <iframe src='https://player.viloud.tv/embed/channel/7c7d7f9fa9b01beedb28d6894940b496?autoplay=1&volume=1&controls=1&title=1&share=1&open_playlist=0&random=0'
+        style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;'
+        frameborder='0' allow='autoplay' allowfullscreen></iframe></div>`;
+    }
+
+    if (type === "jack") {
+        content = `
+        <div style='position: relative; padding-bottom: 56.25%; height: 0;'>
+        <iframe src='https://player.viloud.tv/embed/channel/2d8557b9628bb99c044562f431d2429d?autoplay=1&volume=1&controls=1&title=1&share=1&open_playlist=0&random=0'
+        style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;'
+        frameborder='0' allow='autoplay' allowfullscreen></iframe></div>`;
+    }
+
+    if (type === "beachboy") {
+        content = `
+        <div style='position: relative; padding-bottom: 56.25%; height: 0;'>
+        <iframe src='https://player.viloud.tv/embed/channel/a82cc39cb90713fd2cd0c8b12866436e?autoplay=1&volume=1&controls=1&title=1&share=1&open_playlist=0&random=0'
+        style='position: absolute; top: 0; left: 0; width: 100%; height: 100%;'
+        frameborder='0' allow='autoplay' allowfullscreen></iframe></div>`;
+    }
+
+    document.getElementById("playerContainer").innerHTML = content;
+    document.getElementById("playerModal").style.display = "flex";
+}
+
+function closePlayer() {
+    document.getElementById("playerModal").style.display = "none";
+    document.getElementById("playerContainer").innerHTML = "";
+}
+</script>
+
+</body>
+</html>
