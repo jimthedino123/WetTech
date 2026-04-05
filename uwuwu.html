@@ -574,15 +574,19 @@ footer {
         </div>
     </div>
 
-    <!-- Placeholder cards to fill the row -->
-    <div class="card" style="opacity:0.35; pointer-events:none;">
-        <div style="width:100%;aspect-ratio:16/10;background:var(--surface3);"></div>
+    <div class="card" onclick="openPlayer('dragpath')">
+        <img class="card-thumb" src="https://upload.wikimedia.org/wikipedia/en/2/24/Twenty_One_Pilots_-_Drag_Path.png" alt="Drag Path">
+        <div class="card-overlay">
+            <div class="card-play-icon">▶</div>
+        </div>
         <div class="card-info">
-            <div class="card-name">Coming Soon</div>
-            <div class="card-sub">Stay tuned</div>
+            <div class="card-name">Drag Path</div>
+            <div class="card-sub">Twenty One Pilots · Alternative</div>
         </div>
     </div>
-    <div class="card" style="opacity:0.2; pointer-events:none;">
+
+    <!-- Placeholder card -->
+    <div class="card" style="opacity:0.25; pointer-events:none;">
         <div style="width:100%;aspect-ratio:16/10;background:var(--surface3);"></div>
         <div class="card-info">
             <div class="card-name">Coming Soon</div>
@@ -626,7 +630,8 @@ window.addEventListener('load', () => {
 const channels = {
     yarn:     '7c7d7f9fa9b01beedb28d6894940b496',
     jack:     '2d8557b9628bb99c044562f431d2429d',
-    beachboy: 'a82cc39cb90713fd2cd0c8b12866436e'
+    beachboy: 'a82cc39cb90713fd2cd0c8b12866436e',
+    dragpath: 'c7feca32f3d9835796e9cd9ce44c3115'
 };
 
 function openPlayer(type) {
